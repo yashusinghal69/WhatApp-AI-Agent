@@ -1,15 +1,21 @@
 [project]
-name = "whatsapp-advance-agent"
+name = "whatsapp-ai-bot"
 version = "0.1.0"
 description = "Advanced WhatsApp Bot with AI capabilities using Meta Business API"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "openai>=1.101.0",
-    "python-dotenv>=1.1.1",
-    "whatsapp-chatgpt-python>=1.0.0",
-    "requests>=2.31.0",
-    "fastapi>=0.104.1",
-    "uvicorn>=0.24.0",
-    "pydantic>=2.5.0",
+    "openai>=1.0.0",
+    "python-dotenv==1.0.0",
+    "requests==2.31.0",
+    "fastapi==0.104.1",
+    "uvicorn==0.24.0",
+    "pydantic==2.5.0",
+    "httpx==0.25.2",
+    "python-multipart==0.0.6",
 ]
+
+[tool.uvicorn]
+host = "0.0.0.0"
+port = 5000
+reload = true
