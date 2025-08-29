@@ -9,15 +9,13 @@ config = Config()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
- 
 
 openai_client = AsyncOpenAI(api_key=config.OPENAI_API_KEY)
- 
 http_client = httpx.AsyncClient(timeout=30.0)
 
 
 async def send_typing_indicator_and_read_receipt(to: str, message_id: str) -> bool:
- 
+    
     headers = {
         "Authorization": f"Bearer {config.WHATSAPP_ACCESS_TOKEN}",
         "Content-Type": "application/json"
@@ -32,25 +30,19 @@ async def send_typing_indicator_and_read_receipt(to: str, message_id: str) -> bo
         }
     }
     
-    try:
-        response = await http_client.post(
-            f"https://graph.facebook.com/v22.0/{config.WHATSAPP_PHONE_NUMBER_ID}/messages",
-            headers=headers,
-            json=payload
-        )
-        
-        if response.status_code == 200:
-            logger.info(f"✅ Typing indicator and read receipt sent for {to}")
-            return True
-        else:
-            logger.error(f"❌ Failed to send typing indicator and read receipt: {response.status_code} - {response.text}")
-            return False
-            
-    except Exception as e:
-        logger.error(f"Error sending typing indicator and read receipt: {e}")
+    response = await http_client.post(
+        f"https://graph.facebook.com/v22.0/{config.WHATSAPP_PHONE_NUMBER_ID}/messages",
+        headers=headers,
+        json=payload
+    )
+    
+    if response.status_code == 200:
+        logger.info(f"✅ Typing indicator and read receipt sent for {to}")
+        return True
+    else:
+        logger.error(f"❌ Failed to send typing indicator and read receipt: {response.status_code} - {response.text}")
         return False
-
- 
+            
 
 async def send_whatsapp_message(to: str, message: str) -> bool:
     
@@ -65,25 +57,21 @@ async def send_whatsapp_message(to: str, message: str) -> bool:
         "type": "text",
         "text": {"body": message}
     }
-    
-    try:
-        response = await http_client.post(
-           f"https://graph.facebook.com/v22.0/{config.WHATSAPP_PHONE_NUMBER_ID}/messages",
-            headers=headers,
-            json=payload
-        )
-        
-        if response.status_code == 200:
-            logger.info(f"✅ Message sent successfully to {to}")
-            return True
-        else:
-            logger.error(f"❌ Failed to send message: {response.status_code} - {response.text}")
-            return False
-            
-    except Exception as e:
-        logger.error(f"Error sending WhatsApp message: {e}")
-        return False
 
+    response = await http_client.post(
+        f"https://graph.facebook.com/v22.0/{config.WHATSAPP_PHONE_NUMBER_ID}/messages",
+        headers=headers,
+        json=payload
+    )
+    
+    if response.status_code == 200:
+        logger.info(f"✅ Message sent successfully to {to}")
+        return True
+    else:
+        logger.error(f"❌ Failed to send message: {response.status_code} - {response.text}")
+        return False
+            
+   
 
 async def get_openai_response(user_message: str, user_phone: str) -> str:
  
@@ -122,7 +110,7 @@ async def process_whatsapp_message(message_data: Dict[str, Any]) -> None:
     if message_type == "text":
         user_message = message_data.get("text", {}).get("body", "").strip()
     else:
-        # Handle non-text messages
+       
         await send_whatsapp_message(
             from_number, 
             "I can only process text messages at the moment. Please send a text message!"
@@ -131,30 +119,20 @@ async def process_whatsapp_message(message_data: Dict[str, Any]) -> None:
     
     logger.info(f"📱 Received message from {from_number}: {user_message}")
     
-    # Send typing indicator and mark message as read in one request
-    if message_id:
-        await send_typing_indicator_and_read_receipt(from_number, message_id)
- 
-    try:
- 
-        ai_response = await get_openai_response(user_message, from_number)
-        
-        success = await send_whatsapp_message(from_number, ai_response)
-        
-        if success:
-            logger.info(f"✅ Complete conversation processed for {from_number}")
-        else:
-            logger.error(f"❌ Failed to complete conversation for {from_number}")
-            
-    except Exception as e:
-        logger.error(f"❌ Error processing message for {from_number}: {e}")
-        # Send error message if something goes wrong
-        await send_whatsapp_message(
-            from_number, 
-            "Sorry, I encountered an error while processing your message. Please try again."
-        )
-            
 
+    
+    await send_typing_indicator_and_read_receipt(from_number, message_id)
+ 
+    ai_response = await get_openai_response(user_message, from_number)
+    
+    success = await send_whatsapp_message(from_number, ai_response)
+    
+    if success:
+        logger.info(f"✅ Complete conversation processed for {from_number}")
+    else:
+        logger.error(f"❌ Failed to complete conversation for {from_number}")
+            
+            
 async def handle_webhook_data(body: Dict[str, Any]) -> None:
   
     try:
@@ -189,7 +167,6 @@ async def handle_webhook_data(body: Dict[str, Any]) -> None:
         logger.error(f"Error handling webhook data: {e}")
 
 
- 
 
 async def verify_webhook(mode: str, token: str, challenge: str, verify_token: str) -> Optional[str]:
  

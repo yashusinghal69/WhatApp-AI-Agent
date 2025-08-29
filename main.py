@@ -11,7 +11,6 @@ from app.webhook import (
     verify_webhook
 )
 
-
 logging.basicConfig(
     level=logging.INFO if not config.DEBUG else logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -19,7 +18,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
- 
 app = FastAPI(
     title="WhatsApp AI Bot",
     description="Production-ready WhatsApp AI Bot with OpenAI integration",
@@ -28,15 +26,11 @@ app = FastAPI(
 
 @app.get("/")
 async def root():
-    """
-    Health check endpoint
-    """
     return {
         "status": "active",
         "message": "WhatsApp AI Bot is running!",
         "version": "1.0.0"
     }
-
 
 @app.get("/webhook")
 async def webhook_verification(
@@ -45,18 +39,11 @@ async def webhook_verification(
     hub_verify_token: str = Query(None, alias="hub.verify_token"),
     hub_challenge: str = Query(None, alias="hub.challenge")
 ):
-    
-    logger.info(f"🔍 Webhook verification request received")
-    logger.info(f"Mode: {hub_mode}")
-    logger.info(f"Token received: {hub_verify_token}")
-    logger.info(f"Challenge: {hub_challenge}")
-    logger.info(f"Expected token: {config.WEBHOOK_VERIFY_TOKEN}")
-    
-    
+        
     challenge = await verify_webhook(
         hub_mode, 
-        hub_verify_token, 
-        hub_challenge, 
+        hub_verify_token,
+        hub_challenge,
         config.WEBHOOK_VERIFY_TOKEN
     )
     
